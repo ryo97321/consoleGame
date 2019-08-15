@@ -39,6 +39,7 @@ func main() {
 	var rate = 2
 
 	var replayFlag int
+	var loseFlag = false
 
 	var cards []string
 	cards = append(cards, "A")
@@ -58,7 +59,7 @@ func main() {
 	showInitialMessage()
 
 	for {
-
+		loseFlag = false
 		rate = 2
 
 		fmt.Println("First card.")
@@ -73,6 +74,7 @@ func main() {
 		stdin.Scan()
 		input = stdin.Text()
 		bet, _ = strconv.Atoi(input)
+		money -= bet
 
 		cardIndex = rand.Intn(13)
 		showCard(cards[cardIndex])
@@ -80,19 +82,27 @@ func main() {
 		nowCardValue = cardIndex
 
 		if nowCardValue > previousCardValue {
+			money += bet
 			fmt.Printf("You win. %d$ win\n", bet)
 			fmt.Printf("Rate is %d. Continue? (1=Yes; 0=No) : ", rate)
+			rate *= 2
 
 			stdin.Scan()
 			input = stdin.Text()
 			replayFlag, _ = strconv.Atoi(input)
 
 			for {
+				if loseFlag {
+					break
+				}
 				if replayFlag == 0 {
-					money += bet
+					fmt.Printf("Money is %d.\n", money)
+					fmt.Println()
 					break
 				}
 
+				bet = bet * (rate / 2)
+				money -= bet
 				cardIndex = rand.Intn(13)
 				showCard(cards[cardIndex])
 
@@ -100,31 +110,29 @@ func main() {
 				nowCardValue = cardIndex
 
 				if nowCardValue > previousCardValue {
-					bet *= rate
-					rate *= 2
+					money += bet
 					fmt.Printf("You win. %d$ win\n", bet)
 					fmt.Printf("Rate is %d. Continue? (1=Yes; 0=No) : ", rate)
+					rate *= 2
 
 					stdin.Scan()
 					input = stdin.Text()
 					replayFlag, _ = strconv.Atoi(input)
 				} else {
-					money -= bet
 					fmt.Printf("You lose. Your money is %d$.\n", money)
+					fmt.Println()
+					loseFlag = true
 				}
 			}
 		} else {
-			money -= bet
 			fmt.Printf("You lose. Your money is %d$.\n", money)
+			fmt.Println()
 		}
 
 		// money > 1000 or bankrupt -> end
 		if money > 1000 || money < 0 {
 			break
 		}
-
-		fmt.Printf("Money is %d\n", money)
-		fmt.Println()
 	}
 
 }
